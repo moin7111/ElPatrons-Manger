@@ -1,64 +1,122 @@
-services:
-  - type: web
-    name: blfantasy-api
-    env: python
-    plan: free  # Updated from deprecated 'starter' plan
-    region: frankfurt
-    autoDeploy: true
-    healthCheckPath: /health
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: SECRET_KEY
-        generateValue: true
-      - key: API_KEY
-        sync: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: blfantasy-postgres
-          property: connectionString
-
-  - type: worker
-    name: blfantasy-worker
-    env: python
-    plan: free  # Updated from deprecated 'starter' plan
-    region: frankfurt
-    autoDeploy: true
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m app.jobs.worker
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: blfantasy-postgres
-          property: connectionString
-      - key: SECRET_KEY
-        generateValue: true
-
-  - type: cron
-    name: daily-ingest
-    env: python
-    schedule: "0 4 * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m app.jobs.ingest
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: blfantasy-postgres
-          property: connectionString
-
-  - type: cron
-    name: prematch-pull
-    env: python
-    schedule: "0 */2 * * 5,6,0"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m app.jobs.prematch
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: blfantasy-postgres
-          property: connectionString
+# render.yaml Configuration for BLFantasy
+# Repository: moin7111/ElPatrons-Manger
+# Auto-sync enabled: Changes to this file will automatically update services
 
 databases:
   - name: blfantasy-postgres
-    plan: basic-256mb  # Updated from deprecated 'starter' plan
-    region: frankfurt
+    plan: basic-256mb # $10.50/month
+    databaseName: blfantasy
+    user: blfantasy_user
+    # Optional: Set specific PostgreSQL version
+    # version: "15"
+    
+    # IP Allow List (optional - for security)
+    # ipAllowList:
+    #   - source: 0.0.0.0/0
+    #     description: Allow all IPs (not recommended for production)
+
+services:
+  # Web Service - API
+  - type: web
+    name: blfantasy-api
+    runtime: docker # or specify: node, python, go, rust, etc.
+    plan: starter # Free tier available
+    
+    # Build configuration
+    buildCommand: npm install && npm run build # Adjust based on your stack
+    startCommand: npm start # Adjust based on your stack
+    
+    # Environment configuration
+    envVars:
+      - key: API_KEY
+        value: c36406e12f8357f0959aacf5ffea35ec
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blfantasy-postgres
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+    
+    # Health check endpoint
+    healthCheckPath: /health
+    
+    # Scaling (for paid plans)
+    # numInstances: 1
+    
+    # Domains (optional)
+    # domains:
+    #   - blfantasy.yourdomain.com
+
+  # Background Worker
+  - type: worker
+    name: blfantasy-worker
+    runtime: docker # or specify runtime
+    plan: starter
+    
+    # Build configuration
+    buildCommand: npm install && npm run build:worker # Adjust based on your stack
+    startCommand: npm run worker # Adjust based on your stack
+    
+    # Environment configuration
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blfantasy-postgres
+          property: connectionString
+      - key: WORKER_CONCURRENCY
+        value: "5"
+      - key: NODE_ENV
+        value: production
+    
+    # Scaling (for paid plans)
+    # numInstances: 1
+
+  # Cron Job - Daily Ingest
+  - type: cron
+    name: daily-ingest
+    runtime: docker # or specify runtime
+    plan: starter # $0.00016/minute when running
+    
+    # Cron schedule (daily at midnight UTC)
+    schedule: "0 0 * * *"
+    
+    # Build configuration
+    buildCommand: npm install && npm run build:jobs # Adjust based on your stack
+    command: npm run job:daily-ingest # Command to execute
+    
+    # Environment configuration
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blfantasy-postgres
+          property: connectionString
+      - key: JOB_TYPE
+        value: daily_ingest
+
+  # Cron Job - Prematch Pull
+  - type: cron
+    name: prematch-pull
+    runtime: docker # or specify runtime
+    plan: starter # $0.00016/minute when running
+    
+    # Cron schedule (every 30 minutes)
+    schedule: "*/30 * * * *"
+    
+    # Build configuration
+    buildCommand: npm install && npm run build:jobs # Adjust based on your stack
+    command: npm run job:prematch-pull # Command to execute
+    
+    # Environment configuration
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blfantasy-postgres
+          property: connectionString
+      - key: JOB_TYPE
+        value: prematch_pull
+      - key: API_KEY
+        value: c36406e12f8357f0959aacf5ffea35ec
+
+# Preview Environments (optional)
+# previewsEnabled: true
+# previewsExpireAfterDays: 3
