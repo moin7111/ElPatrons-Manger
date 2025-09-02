@@ -19,8 +19,8 @@ except Exception:
 	raise
 
 # --- Configuration ---
-API_BASE = "https://DEIN-SERVICE.onrender.com"  # <-- hier deine Render-URL eintragen
-API_KEY: Optional[str] = None  # Optional: "xyz..." falls benötigt
+API_BASE = "https://blfantasy-api.onrender.com"  # <-- deine Render-URL hier eintragen
+API_KEY: Optional[str] = "c36406e12f8357f0959aacf5ffea35ec"  # z.B. "xyz..." falls nötig
 
 TIMEOUT_SEC = 60
 MAX_RETRIES = 3
