@@ -15,7 +15,7 @@
 - **Name:** `blfantasy-api`
 - **Instance Type:** Starter (impliziert)
 - **Umgebungsvariablen:**
-  - `API_KEY`: c36406e12f8357f0959aacf5ffea35ec
+  - `API_KEY`: [in Render Secret gesetzt]
 - **Monatliche Kosten:** Im Gesamtpreis enthalten
 
 ### 3. Background Worker

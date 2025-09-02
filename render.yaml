@@ -19,17 +19,17 @@ services:
   # Web Service - API
   - type: web
     name: blfantasy-api
-    runtime: docker # or specify: node, python, go, rust, etc.
-    plan: starter # Free tier available
+    runtime: python
+    plan: starter
     
     # Build configuration
-    buildCommand: npm install && npm run build # Adjust based on your stack
-    startCommand: npm start # Adjust based on your stack
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app --bind 0.0.0.0:$PORT
     
     # Environment configuration
     envVars:
       - key: API_KEY
-        value: c36406e12f8357f0959aacf5ffea35ec
+        sync: false
       - key: DATABASE_URL
         fromDatabase:
           name: blfantasy-postgres
@@ -50,12 +50,12 @@ services:
   # Background Worker
   - type: worker
     name: blfantasy-worker
-    runtime: docker # or specify runtime
+    runtime: python
     plan: starter
     
     # Build configuration
-    buildCommand: npm install && npm run build:worker # Adjust based on your stack
-    startCommand: npm run worker # Adjust based on your stack
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m jobs.worker
     
     # Environment configuration
     envVars:
@@ -74,15 +74,15 @@ services:
   # Cron Job - Daily Ingest
   - type: cron
     name: daily-ingest
-    runtime: docker # or specify runtime
+    runtime: python
     plan: starter # $0.00016/minute when running
     
     # Cron schedule (daily at midnight UTC)
     schedule: "0 0 * * *"
     
     # Build configuration
-    buildCommand: npm install && npm run build:jobs # Adjust based on your stack
-    command: npm run job:daily-ingest # Command to execute
+    buildCommand: pip install -r requirements.txt
+    command: python -m jobs.daily_ingest
     
     # Environment configuration
     envVars:
@@ -96,15 +96,15 @@ services:
   # Cron Job - Prematch Pull
   - type: cron
     name: prematch-pull
-    runtime: docker # or specify runtime
+    runtime: python
     plan: starter # $0.00016/minute when running
     
     # Cron schedule (every 30 minutes)
     schedule: "*/30 * * * *"
     
     # Build configuration
-    buildCommand: npm install && npm run build:jobs # Adjust based on your stack
-    command: npm run job:prematch-pull # Command to execute
+    buildCommand: pip install -r requirements.txt
+    command: python -m jobs.prematch_pull
     
     # Environment configuration
     envVars:
@@ -115,7 +115,7 @@ services:
       - key: JOB_TYPE
         value: prematch_pull
       - key: API_KEY
-        value: c36406e12f8357f0959aacf5ffea35ec
+        sync: false
 
 # Preview Environments (optional)
 # previewsEnabled: true
