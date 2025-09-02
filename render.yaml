@@ -24,7 +24,7 @@ services:
     
     # Build configuration
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app.main:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
     
     # Environment configuration
     envVars:
