@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect stack
+        id: detect
+        run: |
+          if [ -f requirements.txt ] || [ -f pyproject.toml ]; then echo "stack=python" >> $GITHUB_OUTPUT; fi
+          if [ -f package.json ]; then echo "stack=node" >> $GITHUB_OUTPUT; fi
+
+      - name: Setup Python
+        if: steps.detect.outputs.stack == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python deps
+        if: steps.detect.outputs.stack == 'python'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U ruff black pip-audit
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+
+      - name: Lint (ruff)
+        if: steps.detect.outputs.stack == 'python'
+        run: ruff check . || true
+
+      - name: Format check (black)
+        if: steps.detect.outputs.stack == 'python'
+        run: black --check . || true
+
+      - name: Security audit (pip-audit)
+        if: steps.detect.outputs.stack == 'python'
+        run: pip-audit -n || true
+
+      - name: Setup Node
+        if: steps.detect.outputs.stack == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node deps
+        if: steps.detect.outputs.stack == 'node'
+        run: |
+          corepack enable
+          if [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; else npm ci || npm i; fi
+
+      - name: Lint (eslint)
+        if: steps.detect.outputs.stack == 'node'
+        run: |
+          if [ -f node_modules/.bin/eslint ]; then npx eslint . || true; else echo "eslint not configured"; fi
+
+      - name: Format check (prettier)
+        if: steps.detect.outputs.stack == 'node'
+        run: |
+          if npx prettier -v >/dev/null 2>&1; then npx prettier -c . || true; else echo "prettier not configured"; fi
+
+      - name: Secret scan (gitleaks)
+        uses: zricethezav/gitleaks-action@v2
+        with:
+          args: "detect --source=. --redact --no-git"
