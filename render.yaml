@@ -2,7 +2,7 @@ services:
   - type: web
     name: blfantasy-api
     env: python
-    plan: starter
+    plan: free  # Updated from deprecated 'starter' plan
     region: frankfurt
     autoDeploy: true
     healthCheckPath: /health
@@ -21,7 +21,7 @@ services:
   - type: worker
     name: blfantasy-worker
     env: python
-    plan: starter
+    plan: free  # Updated from deprecated 'starter' plan
     region: frankfurt
     autoDeploy: true
     buildCommand: pip install -r requirements.txt
@@ -60,5 +60,5 @@ services:
 
 databases:
   - name: blfantasy-postgres
-    plan: starter
+    plan: basic-256mb  # Updated from deprecated 'starter' plan
     region: frankfurt
