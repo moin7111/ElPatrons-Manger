@@ -82,7 +82,7 @@ services:
     
     # Build configuration
     buildCommand: pip install -r requirements.txt
-    command: python -m jobs.daily_ingest
+    startCommand: python -m jobs.daily_ingest
     
     # Environment configuration
     envVars:
@@ -104,7 +104,7 @@ services:
     
     # Build configuration
     buildCommand: pip install -r requirements.txt
-    command: python -m jobs.prematch_pull
+    startCommand: python -m jobs.prematch_pull
     
     # Environment configuration
     envVars:
