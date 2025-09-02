@@ -1,0 +1,87 @@
+{
+  "project": "BLFantasy",
+  "repository": "moin7111/ElPatrons-Manger",
+  "platform": "Render",
+  "services": {
+    "database": {
+      "name": "blfantasy-postgres",
+      "type": "PostgreSQL",
+      "plan": "Basic-256mb",
+      "specs": {
+        "ram": "256 MB",
+        "storage": "1 GB SSD",
+        "connections": "97 concurrent connections",
+        "backup": "Daily automatic backups"
+      },
+      "pricing": {
+        "monthly": 10.50,
+        "currency": "USD"
+      }
+    },
+    "webService": {
+      "name": "blfantasy-api",
+      "type": "Web Service",
+      "plan": "Starter",
+      "environment": {
+        "API_KEY": "c36406e12f8357f0959aacf5ffea35ec"
+      },
+      "specs": {
+        "ram": "512 MB",
+        "cpu": "0.5 CPU",
+        "autoDeploy": true,
+        "healthCheck": "/health"
+      },
+      "pricing": {
+        "included": true,
+        "note": "Included in total service cost"
+      }
+    },
+    "backgroundWorker": {
+      "name": "blfantasy-worker",
+      "type": "Background Worker",
+      "plan": "Starter",
+      "specs": {
+        "ram": "512 MB",
+        "cpu": "0.5 CPU",
+        "autoDeploy": true,
+        "persistent": true
+      },
+      "pricing": {
+        "included": true,
+        "note": "Included in total service cost"
+      }
+    },
+    "cronJobs": [
+      {
+        "name": "daily-ingest",
+        "type": "Cron Job",
+        "plan": "Starter",
+        "schedule": "0 0 * * *",
+        "description": "Daily data ingestion task",
+        "pricing": {
+          "perMinute": 0.00016,
+          "currency": "USD",
+          "billing": "Pay per use"
+        }
+      },
+      {
+        "name": "prematch-pull",
+        "type": "Cron Job",
+        "plan": "Starter",
+        "schedule": "*/30 * * * *",
+        "description": "Pull prematch data every 30 minutes",
+        "pricing": {
+          "perMinute": 0.00016,
+          "currency": "USD",
+          "billing": "Pay per use"
+        }
+      }
+    ]
+  },
+  "totalCost": {
+    "baseMonthly": 10.50,
+    "currency": "USD",
+    "excludes": ["Cron job runtime costs"],
+    "billingCycle": "Monthly at beginning of month"
+  }
+}
