@@ -3,7 +3,7 @@
 ## 🚨 Kritische Informationen
 
 ### API Key Sicherheit
-**WARNUNG**: Der API Key `c36406e12f8357f0959aacf5ffea35ec` ist in der Konfiguration sichtbar!
+**WARNUNG**: Ein API Key darf nicht in der Konfiguration sichtbar sein!
 
 **Empfohlene Maßnahmen:**
 1. Verwenden Sie Render's Secret Files oder Environment Groups

@@ -22,9 +22,7 @@
       "name": "blfantasy-api",
       "type": "Web Service",
       "plan": "Starter",
-      "environment": {
-        "API_KEY": "c36406e12f8357f0959aacf5ffea35ec"
-      },
+      "environment": {},
       "specs": {
         "ram": "512 MB",
         "cpu": "0.5 CPU",
