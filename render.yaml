@@ -21,7 +21,7 @@ services:
     name: blfantasy-api
     runtime: python
     pythonVersion: 3.11
-    plan: free
+    plan: starter
     
     # Build configuration
     buildCommand: pip install -r requirements.txt
@@ -52,7 +52,6 @@ services:
   - type: worker
     name: blfantasy-worker
     runtime: python
-    pythonVersion: 3.11
     plan: starter
     
     # Build configuration
@@ -77,8 +76,7 @@ services:
   - type: cron
     name: daily-ingest
     runtime: python
-    pythonVersion: 3.11
-    plan: starter # $0.00016/minute when running
+    # plan not required for cron jobs (pay-per-run)
     
     # Cron schedule (daily at midnight UTC)
     schedule: "0 0 * * *"
@@ -100,8 +98,7 @@ services:
   - type: cron
     name: prematch-pull
     runtime: python
-    pythonVersion: 3.11
-    plan: starter # $0.00016/minute when running
+    # plan not required for cron jobs (pay-per-run)
     
     # Cron schedule (every 30 minutes)
     schedule: "*/30 * * * *"
