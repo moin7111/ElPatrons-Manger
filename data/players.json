@@ -1,0 +1,5 @@
+[
+  {"name": "Max Mustermann", "position": "MID", "team": "Demo FC"},
+  {"name": "Erika Muster",   "position": "DEF", "team": "Beispiel 04"},
+  {"name": "Hans Heuer",     "position": "FWD", "team": "SV Beispiel"}
+]
