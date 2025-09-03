@@ -24,7 +24,7 @@ services:
     plan: starter
     
     # Build configuration
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python -m db.migrate
     startCommand: gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
     
     # Environment configuration
@@ -55,7 +55,7 @@ services:
     plan: starter
     
     # Build configuration
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python -m db.migrate
     startCommand: python -m jobs.worker
     
     # Environment configuration
@@ -82,7 +82,7 @@ services:
     schedule: "0 0 * * *"
     
     # Build configuration
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python -m db.migrate
     startCommand: python -m jobs.daily_ingest
     
     # Environment configuration
@@ -104,7 +104,7 @@ services:
     schedule: "*/30 * * * *"
     
     # Build configuration
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python -m db.migrate
     startCommand: python -m jobs.prematch_pull
     
     # Environment configuration
