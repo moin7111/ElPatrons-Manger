@@ -64,6 +64,8 @@ services:
         fromDatabase:
           name: blfantasy-postgres
           property: connectionString
+      - key: PLAYERS_SOURCE_URL
+        sync: false
       - key: WORKER_CONCURRENCY
         value: "5"
       - key: NODE_ENV
