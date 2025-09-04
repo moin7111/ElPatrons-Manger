@@ -19,9 +19,17 @@ def main() -> None:
                 cur.execute("INSERT INTO job_runs (job_name, status) VALUES (%s, %s) RETURNING id", ("prematch_pull", "started"))
                 run_id = cur.fetchone()[0]
 
-                cur.execute("SELECT id, position, team FROM players")
+                cur.execute("SELECT id, position, team, market_value FROM players")
                 rows = cur.fetchall()
-                feats = [PlayerFeature(player_id=r[0], position=r[1] or "UNK", team=r[2] or "UNK") for r in rows]
+                feats = [
+                    PlayerFeature(
+                        player_id=r[0],
+                        position=r[1] or "UNK",
+                        team=r[2] or "UNK",
+                        market_value=(float(r[3]) if r[3] is not None else None),
+                    )
+                    for r in rows
+                ]
 
                 preds = simple_heuristic(feats)
                 for p in preds:

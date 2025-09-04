@@ -9,7 +9,7 @@ class PlayerFeature:
 	player_id: int
 	position: str
 	team: str
-	# Extend with real features later
+	market_value: float | None = None
 
 
 @dataclass
@@ -29,6 +29,17 @@ def simple_heuristic(features: Iterable[PlayerFeature]) -> List[Prediction]:
 			base = 5.0
 		elif f.position.upper() == "DEF":
 			base = 4.5
+
+		# Optional market value influence (light scaling)
+		if f.market_value is not None:
+			try:
+				mv = float(f.market_value)
+				# scale down large market values; assume units are in whatever source provides
+				# add a small premium up to ~+1.0 points for top valuations
+				premium = min(1.0, (mv / 1_000_000.0) * 0.05)
+				base += premium
+			except Exception:
+				pass
 		# std as simple uncertainty proxy
 		result.append(Prediction(player_id=f.player_id, pred_mean=base, pred_std=1.5))
 	return result

@@ -37,9 +37,10 @@ def main() -> None:
                         name = p.get("name") or p.get("player") or "Unknown"
                         position = p.get("position") or "UNK"
                         team = p.get("team") or p.get("club") or "Unknown"
+                        mv = p.get("market_value") or p.get("marketValue")
                         cur.execute(
-                            "INSERT INTO players (name, position, team) VALUES (%s,%s,%s) ON CONFLICT DO NOTHING",
-                            (name, position, team),
+                            "INSERT INTO players (name, position, team, market_value) VALUES (%s,%s,%s,%s) ON CONFLICT DO NOTHING",
+                            (name, position, team, mv),
                         )
                 conn.commit()
         print("[cron] ingest completed", flush=True)
