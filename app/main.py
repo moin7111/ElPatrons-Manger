@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import os
+from typing import List, Optional
 
 try:
     import psycopg
@@ -32,3 +33,82 @@ async def health_db() -> dict:
         return {"status": "ok", "db": "connected"}
     except Exception as exc:  # noqa: BLE001
         return {"status": "error", "db": str(exc)}
+
+
+@app.get("/players")
+async def list_players(limit: int = 100, offset: int = 0) -> dict:
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn or psycopg is None:
+        return {"players": []}
+    rows: List[tuple] = []
+    with psycopg.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, name, position, team, market_value FROM players ORDER BY id LIMIT %s OFFSET %s",
+                (limit, offset),
+            )
+            rows = cur.fetchall()
+    players = [
+        {
+            "id": r[0],
+            "name": r[1],
+            "position": r[2],
+            "team": r[3],
+            "market_value": float(r[4]) if r[4] is not None else None,
+        }
+        for r in rows
+    ]
+    return {"players": players, "limit": limit, "offset": offset}
+
+
+@app.get("/predictions/latest")
+async def predictions_latest(limit: int = 100, offset: int = 0, model: Optional[str] = None) -> dict:
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn or psycopg is None:
+        return {"predictions": []}
+    query = """
+        SELECT p.player_id, p.model_name, p.pred_mean, p.pred_std
+        FROM predictions_latest p
+        WHERE (%s IS NULL OR p.model_name = %s)
+        ORDER BY p.player_id
+        LIMIT %s OFFSET %s
+    """
+    rows: List[tuple]
+    with psycopg.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (model, model, limit, offset))
+            rows = cur.fetchall()
+    preds = [
+        {
+            "player_id": r[0],
+            "model_name": r[1],
+            "pred_mean": float(r[2]),
+            "pred_std": float(r[3]) if r[3] is not None else None,
+        }
+        for r in rows
+    ]
+    return {"predictions": preds, "limit": limit, "offset": offset, "model": model}
+
+
+@app.get("/predict_team")
+async def predict_team(size: int = 11, model: str = "baseline_v1") -> dict:
+    """Very simple team selection: top N by prediction."""
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn or psycopg is None:
+        return {"team": [], "size": size, "model": model}
+    query = """
+        SELECT p.player_id, p.pred_mean
+        FROM predictions_latest p
+        WHERE p.model_name = %s
+        ORDER BY p.pred_mean DESC
+        LIMIT %s
+    """
+    with psycopg.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (model, size))
+            rows = cur.fetchall()
+    team = [
+        {"player_id": r[0], "pred_mean": float(r[1])}
+        for r in rows
+    ]
+    return {"team": team, "size": size, "model": model}
