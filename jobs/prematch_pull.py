@@ -32,6 +32,16 @@ def main() -> None:
                 ]
 
                 preds = simple_heuristic(feats)
+                # Adjust using injuries table: zero for injured, -2 for doubtful
+                cur.execute("SELECT player_id, status FROM injuries WHERE active = TRUE")
+                injury_rows = cur.fetchall()
+                injured = {pid for pid, st in injury_rows if st == "injured"}
+                doubtful = {pid for pid, st in injury_rows if st == "doubtful"}
+                for p in preds:
+                    if p.player_id in injured:
+                        p.pred_mean = 0.0
+                    elif p.player_id in doubtful:
+                        p.pred_mean = max(0.0, p.pred_mean - 2.0)
                 for p in preds:
                     cur.execute(
                         """

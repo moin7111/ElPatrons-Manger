@@ -120,6 +120,27 @@ services:
       - key: API_KEY
         sync: false
 
+  # Cron Job - News Ingest
+  - type: cron
+    name: news-ingest
+    runtime: python
+    
+    # Cron schedule (every 2 hours)
+    schedule: "0 */2 * * *"
+    
+    # Build configuration
+    buildCommand: pip install -r requirements.txt && python -m db.migrate
+    startCommand: python -m app.jobs.news
+    
+    # Environment configuration
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blfantasy-postgres
+          property: connectionString
+      - key: NEWS_FEEDS
+        sync: false
+
 # Preview Environments (optional)
 # previewsEnabled: true
 # previewsExpireAfterDays: 3

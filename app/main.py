@@ -35,6 +35,37 @@ async def health_db() -> dict:
         return {"status": "error", "db": str(exc)}
 
 
+# Optional private connector endpoints (guarded via env toggle)
+try:
+    from app.private_connector import build_connector_from_env
+except Exception:
+    build_connector_from_env = None
+
+
+@app.get("/me/overview")
+async def me_overview() -> dict:
+    if not os.getenv("BLF_CONNECTOR_ENABLED") or build_connector_from_env is None:
+        return {"enabled": False}
+    try:
+        conn = build_connector_from_env()
+        data = conn.get_overview()
+        return {"enabled": True, "data": data}
+    except Exception as exc:
+        return {"enabled": True, "error": str(exc)}
+
+
+@app.get("/me/squad")
+async def me_squad() -> dict:
+    if not os.getenv("BLF_CONNECTOR_ENABLED") or build_connector_from_env is None:
+        return {"enabled": False}
+    try:
+        conn = build_connector_from_env()
+        data = conn.get_squad()
+        return {"enabled": True, "data": data}
+    except Exception as exc:
+        return {"enabled": True, "error": str(exc)}
+
+
 @app.get("/players")
 async def list_players(limit: int = 100, offset: int = 0) -> dict:
     dsn = os.getenv("DATABASE_URL")
